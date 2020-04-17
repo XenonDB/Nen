@@ -9,11 +9,11 @@ Features to implement:
 
 2.In game guide(Using [Patchouli](https://www.curseforge.com/minecraft/mc-mods/patchouli) and creative only)
 
-3.Aura system for living and basic nen techniques(Ten, Zetsu, Ren)
+3.Aura system for living and basic nen techniques(Ten, Zetsu, Ren, Hatsu)
 
 4.Nen learning and traing way.
 
-5.Advance nen techniques(Hatsu and abilities which I think can't only explain by Ten, Zetsu, Ren)
+5.Advance nen techniques
 
 6.Use nen techinques to create you own unique nen skill.
 
@@ -31,11 +31,11 @@ Features to implement:
 
 2.遊戲內指南書(借用[Patchouli](https://www.curseforge.com/minecraft/mc-mods/patchouli)完成並且預計創造限定)
 
-3."氣"系統及基本念技(纏、絕、練)
+3."氣"系統及基本念技(纏、絕、練、發)
 
 4.念的習得、修練以及開發
 
-5.進階念技(發 以及那些我覺得不能單純用基本技解釋的能力)
+5.進階念技
 
 6.使用念技創造自己獨一無二的能力
 
