@@ -7,7 +7,7 @@ Features to implement:
 
 1.Entity part system
 
-2.In game guide(Using Patchouli and creative only)
+2.In game guide(Using [Patchouli](https://www.curseforge.com/minecraft/mc-mods/patchouli) and creative only)
 
 3.Aura system for living and basic nen techniques(Ten, Zetsu, Ren)
 
@@ -29,7 +29,7 @@ Features to implement:
 
 1.部位系統
 
-2.遊戲內指南書(借用Patchouli完成並且預計創造限定)
+2.遊戲內指南書(借用[Patchouli](https://www.curseforge.com/minecraft/mc-mods/patchouli)完成並且預計創造限定)
 
 3."氣"系統及基本念技(纏、絕、練)
 
