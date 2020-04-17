@@ -1,0 +1,16 @@
+[
+{
+  "modid": "nen",
+  "name": "Nen",
+  "description": "A mod which add 'Nen' system.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["PTH_Xenon"],
+  "credits": "All right reserved.",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
