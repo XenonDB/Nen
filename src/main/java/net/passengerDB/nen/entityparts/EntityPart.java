@@ -297,12 +297,11 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 	
 	@Override
     public boolean isInvisible(){
-		boolean flag = false;
         /*if(world.isRemote) {
         	EntityPlayerSP p = Minecraft.getMinecraft().player;
         	flag = (!p.isCreative() && !p.isSpectator() && p != this.host);
         }*/
-        return flag || getHost().isInvisible() || super.isInvisible();
+        return getHost().isInvisible() || super.isInvisible();
     }
 
 	@Override
