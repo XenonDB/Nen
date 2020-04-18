@@ -1,6 +1,7 @@
 package net.passengerDB.nen.asm;
 
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.passengerDB.nen.asm.transformer.itemboat.PreventBoatBlockedByPart;
 import net.passengerDB.nen.asm.transformer.raytrace.PlayerRayTraceExclude;
 
 public class TransformerAssignment implements IClassTransformer {
@@ -15,9 +16,10 @@ public class TransformerAssignment implements IClassTransformer {
 			return clsdata;
 		case "net.minecraft.entity.monster.EntityMob"://attackEntityAsMob
 			return clsdata;
+		case "net.minecraft.item.ItemBoat":
+			return PreventBoatBlockedByPart.transform(name, transformedName, clsdata);
 		default:
 			return clsdata;
-		
 		}
 	}
 

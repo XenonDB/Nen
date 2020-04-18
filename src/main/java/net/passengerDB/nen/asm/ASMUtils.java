@@ -3,9 +3,12 @@ package net.passengerDB.nen.asm;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
+
+import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 
 public class ASMUtils {
 	
@@ -53,6 +56,13 @@ public class ASMUtils {
 	      }
 	    }
 		
+		return null;
+	}
+	
+	public static MethodNode findFirstMethod(ClassNode clsNode, String clsobfName, String methodName) {
+		for (MethodNode mn : clsNode.methods) {
+            if(methodName.equals(FMLDeobfuscatingRemapper.INSTANCE.mapMethodName(clsobfName, mn.name, mn.desc))) return mn;
+		}
 		return null;
 	}
 	
