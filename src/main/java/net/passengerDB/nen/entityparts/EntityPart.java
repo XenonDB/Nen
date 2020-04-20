@@ -46,6 +46,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 	private boolean isControlSource;
 	public float dmgFactor = 1.0f;
 	private EnumEntityPartType type;
+	public boolean canBeCollided = true;
 	
 	//表示宿主"通常"狀況下hitbox的寬與高，用來做為調整自身hitbox的參考值。
 	//分別為x,y,z
@@ -142,6 +143,11 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 	
 	public EntityPart setPartType(EnumEntityPartType t) {
 		this.type = t;
+		return this;
+	}
+	
+	public EntityPart setCanBeCollidedWith(boolean b) {
+		this.canBeCollided = b;
 		return this;
 	}
 	
@@ -243,12 +249,19 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 	@Override
 	public void applyEntityCollision(Entity e) {}
 	
+	//TODO:將火焰保護的燒傷時間減免反映到EntityPart上
 	@Override
 	public boolean attackEntityFrom(DamageSource src, float dmg) {
 		if(!this.world.isRemote) {
 			Entity h = getHost();
 			boolean flag = h != null ? h.attackEntityFrom(src, dmg*dmgFactor) : false;
-			if(flag) manager.markMotionUpdate();
+			if(flag) {
+				Entity attacker = src.getTrueSource();
+				//假如其他模組的附魔，其中的onEntityDamaged或onUserHurt(尤其是onEntityDamaged)
+				//其第二個參數有可能傳入EntityPart做處理(不包含使用instanceof或之類的排除處理)，則EntityPart受攻擊時可能導致該附魔實際功能連續發動2次。
+				if(attacker instanceof EntityLivingBase)this.applyEnchantments((EntityLivingBase) attacker, h);
+				manager.markMotionUpdate();
+			}
 			return flag;
 		}
 		return false;
@@ -292,7 +305,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 	
 	@Override
     public boolean canBeCollidedWith() {
-        return true;
+        return canBeCollided;
     }
 	
 	@Override

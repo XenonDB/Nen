@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import javax.annotation.Nonnull;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
 import net.passengerDB.nen.entityparts.partsenum.EntityPartsHuman;
 import net.passengerDB.nen.entityparts.partsenum.EnumEntityPartType;
@@ -34,6 +35,7 @@ public abstract class EntityPartsManager {
 	//指定哪一種實體要使用哪一種身體部件組
 	static{
 		assignMap.put(EntityPlayer.class, EntityPartsHuman.class);
+		assignMap.put(EntityZombie.class, EntityPartsHuman.class);
 	}
 	
 	
