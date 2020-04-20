@@ -171,11 +171,6 @@ public class PartsHandler {
                         double f1 = MathHelper.sqrt(arrow.motionX * arrow.motionX + arrow.motionZ * arrow.motionZ);
                         if (f1 > 0.0F) liv.addVelocity(arrow.motionX * kbStrength * 0.6 / f1, 0.1D, arrow.motionZ * kbStrength * 0.6 / f1);
                     }
-					if (arrow.shootingEntity instanceof EntityLivingBase)
-                    {
-                        EnchantmentHelper.applyThornEnchantments(liv, arrow.shootingEntity);
-                        EnchantmentHelper.applyArthropodEnchantments((EntityLivingBase)arrow.shootingEntity, liv);
-                    }
 					ReflectionHelper.invokeMethodFrom(arrow, "func_184548_a", new Class[] {EntityLivingBase.class}, liv);
 					if (arrow.shootingEntity != null && liv != arrow.shootingEntity && liv instanceof EntityPlayer && arrow.shootingEntity instanceof EntityPlayerMP)
                     {
