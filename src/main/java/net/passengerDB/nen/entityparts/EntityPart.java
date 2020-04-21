@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityLivingBase;
@@ -38,6 +39,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 	private static final DataParameter<Float> RELATIVE_Z = EntityDataManager.createKey(EntityPart.class, DataSerializers.FLOAT);
 	private static final DataParameter<Boolean> HAS_HOST = EntityDataManager.createKey(EntityPart.class, DataSerializers.BOOLEAN);
 	private static final DataParameter<Integer> HOST_ID = EntityDataManager.createKey(EntityPart.class, DataSerializers.VARINT);
+	private static final DataParameter<Integer> PART_TYPE = EntityDataManager.createKey(EntityPart.class, DataSerializers.VARINT);
 	
 	private EntityPartsManager manager;
 	//標示該部件是否為本體的動力來源(ex:心臟所在)
@@ -80,6 +82,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 		this.dataManager.register(RELATIVE_Z,Float.valueOf(0.0f));
 		this.dataManager.register(HAS_HOST,Boolean.valueOf(false));
 		this.dataManager.register(HOST_ID,Integer.valueOf(0));
+		this.dataManager.register(PART_TYPE,Integer.valueOf(0));
 	}
 	
 	public EntityPart(EntityPartsManager p, boolean powerSrc, boolean controlSrc) {
@@ -182,6 +185,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 				
 				this.dataManager.set(HAS_HOST, Boolean.valueOf(true));
 				this.dataManager.set(HOST_ID, Integer.valueOf(h.getEntityId()));
+				this.dataManager.set(PART_TYPE, Integer.valueOf(this.type.ordinal()));
 				this.setRotation(h.rotationYaw + rotation[0], h.rotationPitch + rotation[1]);
 				
 				double lr = h.width/this.refHostSize[0];
@@ -249,7 +253,6 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 	@Override
 	public void applyEntityCollision(Entity e) {}
 	
-	//TODO:將火焰保護的燒傷時間減免反映到EntityPart上
 	@Override
 	public boolean attackEntityFrom(DamageSource src, float dmg) {
 		if(!this.world.isRemote) {
@@ -265,6 +268,17 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 			return flag;
 		}
 		return false;
+	}
+	
+	@Override
+	public void setFire(int seconds) {
+		Entity h = getHost();
+		if(h instanceof EntityLivingBase) {
+			seconds = EnchantmentProtection.getFireTimeForEntity((EntityLivingBase)h, seconds*20);
+			super.setFire((int)Math.ceil(seconds/20.0));
+			return;
+		}
+		super.setFire(seconds);
 	}
 	
 	@Override

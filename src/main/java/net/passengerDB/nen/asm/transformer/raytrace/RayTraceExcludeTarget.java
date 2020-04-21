@@ -22,8 +22,8 @@ public static RayTraceExcludeTarget instance = new RayTraceExcludeTarget();
 	@Override
 	public boolean test(Entity e) {
 		if(e instanceof EntityPart) {
-			EntityPart part = (EntityPart)e;
-			if(part.getHost().equals(compared)) return true;
+			Entity h = ((EntityPart)e).getHost();
+			if(h != null && h.equals(compared)) return true;
 		}
 		return false;
 	}

@@ -14,13 +14,10 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 import net.minecraftforge.classloading.FMLForgePlugin;
 import net.passengerDB.nen.asm.ASMUtils;
-import net.passengerDB.nen.utils.NenLogger;
 
 public class EnchantmentResponse {
 
 	public static byte[] transformForPlayer(String name, String transformedName, byte[] clsdata) {
-		
-		NenLogger.info("Start to transform EntityPlayer...");
 		
 		String func = FMLForgePlugin.RUNTIME_DEOBF ? "func_71059_n" : "attackTargetEntityWithCurrentItem";
 		
@@ -68,8 +65,6 @@ public class EnchantmentResponse {
 	}
 	
 	public static byte[] transformForMob(String name, String transformedName, byte[] clsdata) {
-		
-		NenLogger.info("Start to transform EntityMob...");
 		
 		String func = FMLForgePlugin.RUNTIME_DEOBF ? "func_70652_k" : "attackEntityAsMob";
 		
