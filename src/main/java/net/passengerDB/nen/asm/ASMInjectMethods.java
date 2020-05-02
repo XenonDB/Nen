@@ -12,16 +12,15 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.MathHelper;
-import net.passengerDB.nen.asm.transformer.raytrace.RayTraceExcludeTarget;
+import net.passengerDB.nen.asm.transformer.raytrace.ExcludingTarget;
 import net.passengerDB.nen.entityparts.EntityPart;
 import net.passengerDB.nen.utils.ReflectionHelper;
 
 public class ASMInjectMethods {
 
-	public static List<Entity> PlayerPointerExcludedSelfBodyPart(List<Entity> list, Entity ref){
+	public static List<Entity> getEntitiesExcludingSelfBodyPart(List<Entity> list, Entity ref){
 		
-		RayTraceExcludeTarget.instance.setComparedEntity(ref);
-		list.removeIf(RayTraceExcludeTarget.instance);
+		if(ref != null) list.removeIf(new ExcludingTarget(ref));
 		
 		return list;
 	}

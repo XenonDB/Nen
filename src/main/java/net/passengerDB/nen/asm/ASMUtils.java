@@ -60,6 +60,16 @@ public class ASMUtils {
 		return null;
 	}
 	
+	public static AbstractInsnNode findNthInsn(MethodNode m, int opcode, int nth, boolean reverse) {
+		int count = 0;
+		AbstractInsnNode ain = reverse ? m.instructions.getLast() : m.instructions.getFirst();
+		while(ain != null) {
+			if (ain.getOpcode() == opcode && (++count == nth)) return ain;
+			ain = reverse ? ain.getPrevious() : ain.getNext();
+		}
+		return null;
+	}
+	
 	public static MethodNode findFirstMethod(ClassNode clsNode, String clsobfName, String methodName) {
 		for (MethodNode mn : clsNode.methods) {
             if(methodName.equals(FMLDeobfuscatingRemapper.INSTANCE.mapMethodName(clsobfName, mn.name, mn.desc))) return mn;
