@@ -18,7 +18,7 @@ public enum Entities {
 	private Entities(Class<? extends net.minecraft.entity.Entity> entityClass, String entityName, int trackingRange, int updateFrequency, boolean sendsVelocityUpdates) {
 		entityName = entityName.toLowerCase();
 		NenLogger.info(String.format("Register entity: %s, id: %d", entityName, this.ordinal()));
-		EntityRegistry.registerModEntity(RegisteryName.getModResourceLocation(entityName), entityClass, RegisteryName.getModRegisteryName(entityName), this.ordinal(), Nen.instance, trackingRange, updateFrequency, sendsVelocityUpdates);
+		EntityRegistry.registerModEntity(RegisteryName.getModResourceLocation(entityName), entityClass, RegisteryName.getModRegisteryName(entityName), this.ordinal(), Nen.getInstence(), trackingRange, updateFrequency, sendsVelocityUpdates);
 	}
 	
 }

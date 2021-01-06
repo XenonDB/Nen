@@ -43,6 +43,7 @@ public abstract class EntityPartsManager {
 	protected HashMap<EnumEntityPartType,EntityPart[]> parts = new HashMap<EnumEntityPartType,EntityPart[]>();//暫時
 	private boolean dirtyFlagMotion = false;
 	private boolean initialized = false;
+	protected double[] refHostSize = new double[3];
 	/*
 	 * 身體部件的管理者
 	 */
@@ -56,8 +57,11 @@ public abstract class EntityPartsManager {
 		return host;
 	}
 	
-	public Entity getBody() {
-		return host;
+	//createParts指定給各部位的參考大小，直接傳陣列值的方式給予，會同步
+	protected void setRefHostSize(double len, double height, double width) {
+		refHostSize[0] = len;
+		refHostSize[1] = height;
+		refHostSize[2] = width;
 	}
 	
 	public EntityPart[] getParts(EnumEntityPartType t) {
@@ -111,12 +115,15 @@ public abstract class EntityPartsManager {
 		if(!this.initialized) {
 			init();
 		}
-		if(host.isDead) {
-			removeAllParts(false);
-			PartsHandler.managerToRemove.add(this);
-			return;
+		if(!host.isDead) {
+			if(this.host.world.getTotalWorldTime() % 100 == 5) checkAllPartsInWorld();
 		}
-		if(this.host.world.getTotalWorldTime() % 100 == 5) checkAllPartsInWorld();
+		else {
+			
+		}
+		
+		if(!host.isAddedToWorld()) PartsHandler.managerToRemove.add(host);
+		
 	}
 	
 	public void markMotionUpdate() {

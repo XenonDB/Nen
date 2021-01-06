@@ -1,4 +1,8 @@
-entity.entitypart.name.HEAD=%s的頭
-entity.entitypart.name.BODY=%s的身體
-entity.entitypart.name.LEG=%s的腳
-entity.entitypart.name.ARM=%s的手臂
+nen.entity.entitypart.name.HEAD=%s的頭
+nen.entity.entitypart.name.BODY=%s的身體
+nen.entity.entitypart.name.LEG=%s的腳
+nen.entity.entitypart.name.ARM=%s的手臂
+
+nen.guidebook.name=武之心得(創造模式專用)
+nen.guidebook.title=武之心得
+nen.guidebook.landing_text=    $(9)念$(0)，是自由操縱自己的$(5)氣$(0)，也就是$(5)生命能量$(0)的技術。$(br2)    本書將會介紹此模組關於$(9)念$(0)的設定及世界觀。以及如何修行、開發出專屬於自己的$(9)念$(0)。

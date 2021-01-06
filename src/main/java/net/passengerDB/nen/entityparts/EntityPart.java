@@ -39,7 +39,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 	private static final DataParameter<Float> RELATIVE_Z = EntityDataManager.createKey(EntityPart.class, DataSerializers.FLOAT);
 	private static final DataParameter<Boolean> HAS_HOST = EntityDataManager.createKey(EntityPart.class, DataSerializers.BOOLEAN);
 	private static final DataParameter<Integer> HOST_ID = EntityDataManager.createKey(EntityPart.class, DataSerializers.VARINT);
-	private static final DataParameter<Integer> PART_TYPE = EntityDataManager.createKey(EntityPart.class, DataSerializers.VARINT);
+	//private static final DataParameter<Integer> PART_TYPE = EntityDataManager.createKey(EntityPart.class, DataSerializers.VARINT);
 	
 	private EntityPartsManager manager;
 	//標示該部件是否為本體的動力來源(ex:心臟所在)
@@ -82,23 +82,22 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 		this.dataManager.register(RELATIVE_Z,Float.valueOf(0.0f));
 		this.dataManager.register(HAS_HOST,Boolean.valueOf(false));
 		this.dataManager.register(HOST_ID,Integer.valueOf(0));
-		this.dataManager.register(PART_TYPE,Integer.valueOf(0));
+		//this.dataManager.register(PART_TYPE,Integer.valueOf(-1));
 	}
 	
-	public EntityPart(EntityPartsManager p, boolean powerSrc, boolean controlSrc) {
+	public EntityPart(EntityPartsManager p, double[] refSize, boolean powerSrc, boolean controlSrc) {
 		this(p.getHost().world);
 		this.manager = p;
 		this.isPowerSource = powerSrc;
 		this.isControlSource = controlSrc;
+		setRefSize(refSize);
 		
 		Entity h = this.manager.getHost();
-		AxisAlignedBB box = h.getEntityBoundingBox();
-		refHostSize = new double[]{box.maxX-box.minX, box.maxY-box.minY, box.maxZ-box.minZ};
 		this.setPosition(h.posX, h.posY, h.posZ);
 	}
 	
-	public EntityPart(EntityPartsManager p) {
-		this(p,false,false);
+	public EntityPart(EntityPartsManager p, double[] refSize) {
+		this(p,refSize,false,false);
 	}
 	
 	public EntityPartsManager getManager() {
@@ -119,6 +118,12 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 	
 	protected void entityInit() {
 		
+	}
+	
+	//直接取得EntityPartsManager的參考陣列，因此會與manager持有的同步
+	protected EntityPart setRefSize(double[] refArr) {
+		refHostSize = refArr;
+		return this;
 	}
 	
 	public EntityPart setDamageFactor(float f) {
@@ -185,7 +190,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 				
 				this.dataManager.set(HAS_HOST, Boolean.valueOf(true));
 				this.dataManager.set(HOST_ID, Integer.valueOf(h.getEntityId()));
-				this.dataManager.set(PART_TYPE, Integer.valueOf(this.type.ordinal()));
+				//this.dataManager.set(PART_TYPE, Integer.valueOf(this.type.ordinal()));
 				this.setRotation(h.rotationYaw + rotation[0], h.rotationPitch + rotation[1]);
 				
 				double lr = h.width/this.refHostSize[0];
@@ -314,7 +319,7 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 	
 	@Override
 	public String getName() {
-		return I18n.translateToLocalFormatted(String.format("entity.entitypart.name.%s", this.type.name()), getHost().getName());
+		return I18n.translateToLocalFormatted(String.format("nen.entity.entitypart.name.%s", this.type.name()), getHost().getName());
 	}
 	
 	@Override

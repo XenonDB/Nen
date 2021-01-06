@@ -1,0 +1,11 @@
+{
+    "name": "生命能量",
+    "icon": "minecraft:writable_book",
+    "category": "nen:aura",
+    "pages": [
+        {
+            "type": "text",
+            "text": "文字文字12"
+        }
+    ]
+}

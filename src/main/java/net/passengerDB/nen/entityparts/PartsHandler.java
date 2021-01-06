@@ -1,7 +1,7 @@
 package net.passengerDB.nen.entityparts;
 
 import net.passengerDB.nen.utils.NenLogger;
-import net.passengerDB.nen.client.renderer.entity.RenderNull;
+import net.passengerDB.nen.client.renderer.entity.RenderEntityPart;
 import net.passengerDB.nen.utils.ReflectionHelper;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
@@ -23,9 +23,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.Predicate;
 
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -42,19 +45,20 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.common.MinecraftForge;
+
 
 public class PartsHandler {
 
 	public static final PartsHandler partEventHandler = new PartsHandler();
 	
 	private static final HashMap<Entity,EntityPartsManager> managerInstances = new HashMap<Entity,EntityPartsManager>();
-	public static final HashSet<EntityPartsManager> managerToRemove = new HashSet<EntityPartsManager>();
+	public static final HashSet<Entity> managerToRemove = new HashSet<Entity>();
 	
-	public static void init(Side s) {
+	public static void init() {
 		MinecraftForge.EVENT_BUS.unregister(partEventHandler);
 		MinecraftForge.EVENT_BUS.register(partEventHandler);
-		if(s.isClient()) RenderingRegistry.registerEntityRenderingHandler(EntityPart.class, RenderNull.nullRenderFactory);
 		NenLogger.info("Successfully init entity part system.");
 	}
 	
@@ -100,6 +104,7 @@ public class PartsHandler {
 		}
 	}
 	*/
+	
 	@SubscribeEvent
 	public void onManagerTick(ServerTickEvent event) {
 		EntityPartsManager manager;
@@ -124,14 +129,8 @@ public class PartsHandler {
 			
 			if(managerToRemove.isEmpty()) return;
 			
-			tmpitr = managerToRemove.iterator();
-			try {
-				while(true) {
-					manager = tmpitr.next();
-					managerInstances.remove(manager.getHost());
-				}
-			}
-			catch(NoSuchElementException exc) {}
+			managerInstances.keySet().removeAll(managerToRemove);
+			
 			managerToRemove.clear();
 		}
 	}

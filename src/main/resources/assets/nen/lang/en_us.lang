@@ -1,4 +1,7 @@
-entity.entitypart.name.HEAD=%s's head
-entity.entitypart.name.BODY=%s's body
-entity.entitypart.name.LEG=%s's leg
-entity.entitypart.name.ARM=%s's arm
+nen.entity.entitypart.name.HEAD=%s's head
+nen.entity.entitypart.name.BODY=%s's body
+nen.entity.entitypart.name.LEG=%s's leg
+nen.entity.entitypart.name.ARM=%s's arm
+
+nen.guidebook.name=Martial Art
+nen.guidebook.landing_text=$(9)Nen$(0) is a technique about manipulating $(5)aura$(0), which is $(5)life energy$(0). $(br2)This book contain the knowledge about $(9)Nen$(0), including the way to become a $(9)Nen user$(0) and develop you own $(9)Nen$(0).$(br2)Note: This guide book is $(6)creative$(0) only.
