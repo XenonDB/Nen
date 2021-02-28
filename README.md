@@ -5,7 +5,7 @@ This mod is in early alpha stage and a lot things are planning to do.
 
 Features to implement:
 
-1.Entity part system
+1.Entity part system(for nen technique)
 
 2.In game guide(Using [Patchouli](https://www.curseforge.com/minecraft/mc-mods/patchouli) and creative only)
 
@@ -27,7 +27,7 @@ Features to implement:
 
 預計實現的功能：
 
-1.部位系統
+1.部位系統(為了念技而設計)
 
 2.遊戲內指南書(借用[Patchouli](https://www.curseforge.com/minecraft/mc-mods/patchouli)完成並且預計創造限定)
 
