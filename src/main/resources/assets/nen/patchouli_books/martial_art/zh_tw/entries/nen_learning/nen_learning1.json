@@ -1,0 +1,11 @@
+{
+    "name": "1. 覺醒",
+    "icon": "minecraft:writable_book",
+    "category": "nen:nen_learning",
+    "pages": [
+        {
+            "type": "text",
+            "text": "[WIP]"
+        }
+    ]
+}

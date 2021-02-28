@@ -1,0 +1,11 @@
+{
+    "name": "3. 使用基本技",
+    "icon": "minecraft:writable_book",
+    "category": "nen:nen_learning",
+    "pages": [
+        {
+            "type": "text",
+            "text": "[WIP]"
+        }
+    ]
+}

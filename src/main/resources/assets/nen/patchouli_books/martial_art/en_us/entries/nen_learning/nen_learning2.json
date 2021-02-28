@@ -1,0 +1,11 @@
+{
+    "name": "2. 念能力GUI",
+    "icon": "minecraft:writable_book",
+    "category": "nen:nen_learning",
+    "pages": [
+        {
+            "type": "text",
+            "text": "[WIP]"
+        }
+    ]
+}

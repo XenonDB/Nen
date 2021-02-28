@@ -1,0 +1,11 @@
+{
+    "name": "6. 各種不同的「發」",
+    "icon": "minecraft:writable_book",
+    "category": "nen:nen_learning",
+    "pages": [
+        {
+            "type": "text",
+            "text": "[WIP]"
+        }
+    ]
+}

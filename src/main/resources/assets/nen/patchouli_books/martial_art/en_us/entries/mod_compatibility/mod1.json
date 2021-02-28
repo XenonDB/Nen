@@ -1,0 +1,11 @@
+{
+    "name": "1. [WIP]",
+    "icon": "minecraft:writable_book",
+    "category": "nen:mod_compatibility",
+    "pages": [
+        {
+            "type": "text",
+            "text": "[WIP]"
+        }
+    ]
+}

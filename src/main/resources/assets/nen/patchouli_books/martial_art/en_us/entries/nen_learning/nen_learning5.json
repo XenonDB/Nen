@@ -1,0 +1,11 @@
+{
+    "name": "5. 念技製作",
+    "icon": "minecraft:writable_book",
+    "category": "nen:nen_learning",
+    "pages": [
+        {
+            "type": "text",
+            "text": "[WIP]"
+        }
+    ]
+}

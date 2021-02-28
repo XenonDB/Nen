@@ -1,11 +1,11 @@
 {
-    "name": "生命能量",
+    "name": "3. 氣在體內的分配",
     "icon": "minecraft:writable_book",
-    "category": "nen:aura",
+    "category": "nen:details",
     "pages": [
         {
             "type": "text",
-            "text": "文字文字12"
+            "text": "[wip]"
         }
     ]
 }

@@ -32,7 +32,7 @@ public class EntityPartsHuman extends EntityPartsManager {
 		return this.parts.get(EnumEntityPartType.BODY)[0];
 	}
 
-	//todo:將宿主的生物屬性(不死、節肢)反映到部件上
+	//TODO:將宿主的生物屬性(不死、節肢)反映到部件上
 	@Override
 	public void createParts() {
 		Entity h = getHost();

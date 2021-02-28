@@ -20,6 +20,10 @@ public abstract class EntityPartsManager {
 		return assignMap.get(e);
 	}
 	
+	/**
+	 * 註冊哪一類實體需要使用哪種EntityPartsManager。replace = true表示要取代現有的設定，回傳值表示是否註冊成功。
+	 * 若replace = true但沒有註冊，或是replace = false且已經註冊，則會回傳false。
+	 * **/
 	public static boolean registerPartAssignment(Class<? extends Entity> e, Class<? extends EntityPartsManager> m, boolean replace) {
 		if(assignMap.containsKey(e) != replace) return false;
 		assignMap.put(e, m);

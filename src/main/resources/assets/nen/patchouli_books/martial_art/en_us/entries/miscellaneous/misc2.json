@@ -1,11 +1,11 @@
 {
-    "name": "Test Entry",
+    "name": "2. [WIP]",
     "icon": "minecraft:writable_book",
-    "category": "nen:test_category",
+    "category": "nen:miscellaneous",
     "pages": [
         {
             "type": "text",
-            "text": "文字文字1"
+            "text": "[WIP]"
         }
     ]
 }
