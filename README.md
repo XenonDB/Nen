@@ -33,7 +33,7 @@ Features to implement:
 
 1.部位系統(為了念技而設計)
 
-2.遊戲內指南書(借用[Patchouli](https://www.curseforge.com/minecraft/mc-mods/patchouli)完成並且預計創造限定)
+2.遊戲內指南書(借用[Patchouli](https://www.curseforge.com/minecraft/mc-mods/patchouli)完成)
 
 3."氣"系統及基本念技(纏、絕、練、發)
 
