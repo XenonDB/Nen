@@ -1,13 +1,15 @@
 # Nen
 A minecraft mod which aim to add HxH "Nen" System
 
+The features of this mod are based on my understanding and expectation of Nen.
+
 This mod is in early alpha stage and a lot things are planning to do.
 
 Features to implement:
 
 1.Entity part system(for nen technique)
 
-2.In game guide(Using [Patchouli](https://www.curseforge.com/minecraft/mc-mods/patchouli) and creative only)
+2.In game guide(Using [Patchouli](https://www.curseforge.com/minecraft/mc-mods/patchouli))
 
 3.Aura system for living and basic nen techniques(Ten, Zetsu, Ren, Hatsu)
 
@@ -17,11 +19,13 @@ Features to implement:
 
 6.Use nen techinques to create you own unique nen skill.
 
-7.Let other living can also using nen.
+7.Let other living can also use nen.
 
 --------------------------------------------------------------------------------------------------
 
-一個給Minecraft添加獵人世界(Hunter X Hunter)內"念能力"系統的模組
+一個給Minecraft添加獵人世界(Hunter X Hunter)內"念能力"系統的模組。
+
+念的設定和各種功能是基於我對念的理解和期望而來。
 
 模組正在早期alpha階段，仍有很多功能需要完善
 
