@@ -27,9 +27,6 @@ public final class MixinPlayerEntityAttack{
 		f1 = ASMInjectMethods.applyEnchantmentToPartForPlayer((PlayerEntity)(Object)this, p_71059_1_, f1);
 	}
 	
-	//TODO:讓EntityPart繼承PartEntity以使hitEntity生效
-	//修正中
-	
 	//使火焰附加可以生效
 	@Inject(at = { @At(value = "INVOKE", target = "net.minecraft.entity.player.PlayerEntity.causeFoodExhaustion(F)V") }, method = { "attack(Lnet/minecraft/entity/Entity;)V" })
 	private void attack2(Entity p_71059_1_) {

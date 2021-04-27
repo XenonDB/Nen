@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
@@ -12,6 +13,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraft.network.PacketBuffer;
@@ -21,17 +24,19 @@ import net.passengerDB.nen.entityparts.partsenum.EnumEntityPartType;
 import net.passengerDB.nen.utils.NenConfig;
 import net.passengerDB.nen.utils.NenLogger;
 
-public class EntityPart extends PartEntity implements IEntityAdditionalSpawnData {
+
+//TODO: 需要更多測試來確認是否沒有問題
+public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalSpawnData {
 	
-	private static final DataParameter<Float> LEN = EntityDataManager.createKey(EntityPart.class, DataSerializers.FLOAT);
-	private static final DataParameter<Float> HEIGHT = EntityDataManager.createKey(EntityPart.class, DataSerializers.FLOAT);
-	private static final DataParameter<Float> WIDTH = EntityDataManager.createKey(EntityPart.class, DataSerializers.FLOAT);
+	private static final DataParameter<Float> LEN = EntityDataManager.defineId(EntityPart.class, DataSerializers.FLOAT);
+	private static final DataParameter<Float> HEIGHT = EntityDataManager.defineId(EntityPart.class, DataSerializers.FLOAT);
+	private static final DataParameter<Float> WIDTH = EntityDataManager.defineId(EntityPart.class, DataSerializers.FLOAT);
 	
-	private static final DataParameter<Float> RELATIVE_X = EntityDataManager.createKey(EntityPart.class, DataSerializers.FLOAT);
-	private static final DataParameter<Float> RELATIVE_Y = EntityDataManager.createKey(EntityPart.class, DataSerializers.FLOAT);
-	private static final DataParameter<Float> RELATIVE_Z = EntityDataManager.createKey(EntityPart.class, DataSerializers.FLOAT);
-	private static final DataParameter<Boolean> HAS_HOST = EntityDataManager.createKey(EntityPart.class, DataSerializers.BOOLEAN);
-	private static final DataParameter<Integer> HOST_ID = EntityDataManager.createKey(EntityPart.class, DataSerializers.VARINT);
+	private static final DataParameter<Float> RELATIVE_X = EntityDataManager.defineId(EntityPart.class, DataSerializers.FLOAT);
+	private static final DataParameter<Float> RELATIVE_Y = EntityDataManager.defineId(EntityPart.class, DataSerializers.FLOAT);
+	private static final DataParameter<Float> RELATIVE_Z = EntityDataManager.defineId(EntityPart.class, DataSerializers.FLOAT);
+	private static final DataParameter<Boolean> HAS_HOST = EntityDataManager.defineId(EntityPart.class, DataSerializers.BOOLEAN);
+	private static final DataParameter<Integer> HOST_ID = EntityDataManager.defineId(EntityPart.class, DataSerializers.INT);
 	//private static final DataParameter<Integer> PART_TYPE = EntityDataManager.createKey(EntityPart.class, DataSerializers.VARINT);
 	
 	private EntityPartsManager manager;
@@ -49,8 +54,8 @@ public class EntityPart extends PartEntity implements IEntityAdditionalSpawnData
 	private double[] basicSize;
 	
 	//給客戶端用來確認自己的宿主是誰
-	@SideOnly(Side.CLIENT)
-	private Entity host;
+	@OnlyIn(Dist.CLIENT)
+	private Entity hostClient;
 	
 	private float[] relativeCoord = new float[3];
 	private float[] rotation = new float[2];
@@ -63,30 +68,29 @@ public class EntityPart extends PartEntity implements IEntityAdditionalSpawnData
 	 * 4.部件為實體本體部分資訊的實體化，因此實體本體或區塊保存時，不儲存部件。
 	 */
 	
-	public EntityPart(World w) {
-		super(w);
-		this.forceSpawn = true;
-		this.dataManager.register(LEN,Float.valueOf(0.0f));
-		this.dataManager.register(HEIGHT,Float.valueOf(0.0f));
-		this.dataManager.register(WIDTH,Float.valueOf(0.0f));
-		//不確定為甚麼客戶端的實體未制有時後不會跟伺服端同步
-		this.dataManager.register(RELATIVE_X,Float.valueOf(0.0f));
-		this.dataManager.register(RELATIVE_Y,Float.valueOf(0.0f));
-		this.dataManager.register(RELATIVE_Z,Float.valueOf(0.0f));
-		this.dataManager.register(HAS_HOST,Boolean.valueOf(false));
-		this.dataManager.register(HOST_ID,Integer.valueOf(0));
+	public EntityPart(Entity e) {
+		super(e);
+		this.entityData.define(LEN,Float.valueOf(0.0f));
+		this.entityData.define(HEIGHT,Float.valueOf(0.0f));
+		this.entityData.define(WIDTH,Float.valueOf(0.0f));
+		//不確定為甚麼客戶端的實體位置有時後不會跟伺服端同步
+		this.entityData.define(RELATIVE_X,Float.valueOf(0.0f));
+		this.entityData.define(RELATIVE_Y,Float.valueOf(0.0f));
+		this.entityData.define(RELATIVE_Z,Float.valueOf(0.0f));
+		this.entityData.define(HAS_HOST,Boolean.valueOf(false));
+		this.entityData.define(HOST_ID,Integer.valueOf(0));
 		//this.dataManager.register(PART_TYPE,Integer.valueOf(-1));
 	}
 	
 	public EntityPart(EntityPartsManager p, double[] refSize, boolean powerSrc, boolean controlSrc) {
-		this(p.getHost().world);
+		this(p.getHost());
 		this.manager = p;
 		this.isPowerSource = powerSrc;
 		this.isControlSource = controlSrc;
 		setRefSize(refSize);
 		
 		Entity h = this.manager.getHost();
-		this.setPosition(h.posX, h.posY, h.posZ);
+		this.setPosition(h.getX(), h.getY(), h.getZ());
 	}
 	
 	public EntityPart(EntityPartsManager p, double[] refSize) {
@@ -98,14 +102,15 @@ public class EntityPart extends PartEntity implements IEntityAdditionalSpawnData
 	}
 	
 	public Entity getHost() {
-		if(this.world.isRemote) {
-			if(this.host == null) {
-				this.host = this.dataManager.get(HAS_HOST).booleanValue() ? this.world.getEntityByID(this.dataManager.get(HOST_ID).intValue()) : null;
+		if(this.level.isClientSide) {
+			if(this.hostClient == null) {
+				this.hostClient = this.entityData.get(HAS_HOST).booleanValue() ? this.level.getEntity(this.entityData.get(HOST_ID).intValue()) : null;
 			}
-			return this.host;
+			return this.hostClient;
 		}
 		else {
-			return this.manager != null ? this.manager.getHost() : null;
+			//return this.manager != null ? this.manager.getHost() : null;
+			return getParent();
 		}
 	}
 	
@@ -157,34 +162,35 @@ public class EntityPart extends PartEntity implements IEntityAdditionalSpawnData
 	}
 	
 	private void setSyncBoundingBoxSize(double len, double height, double width) {
-		this.dataManager.set(LEN, Float.valueOf((float) (len)));
-		this.dataManager.set(HEIGHT, Float.valueOf((float) (height)));
-		this.dataManager.set(WIDTH, Float.valueOf((float) (width)));
+		this.entityData.set(LEN, Float.valueOf((float) (len)));
+		this.entityData.set(HEIGHT, Float.valueOf((float) (height)));
+		this.entityData.set(WIDTH, Float.valueOf((float) (width)));
 	}
 	
 	public double[] getSyncBoundingBoxSize() {
 		try {
-			return new double[]{this.dataManager.get(LEN).doubleValue(), this.dataManager.get(HEIGHT).doubleValue(), this.dataManager.get(WIDTH).doubleValue()};
+			return new double[]{this.entityData.get(LEN).doubleValue(), this.entityData.get(HEIGHT).doubleValue(), this.entityData.get(WIDTH).doubleValue()};
 		}
 		catch(NullPointerException exc) {
+			exc.printStackTrace();
 			return new double[] {0.0,0.0,0.0};
 		}
 	}
 	
 	@Override
-	public void onUpdate() {
+	public void tick() {
 		Entity h = getHost();
 		
-		if(h == null || h.isDead) {
-			this.setDead();
+		if(h == null || !h.isAlive()) {
+			this.remove();
 		}
 		else {
-			if(!world.isRemote) {
+			if(!level.isClientSide) {
 				
-				this.dataManager.set(HAS_HOST, Boolean.valueOf(true));
-				this.dataManager.set(HOST_ID, Integer.valueOf(h.getEntityId()));
+				this.entityData.set(HAS_HOST, Boolean.valueOf(true));
+				this.entityData.set(HOST_ID, Integer.valueOf(h.getId()));
 				//this.dataManager.set(PART_TYPE, Integer.valueOf(this.type.ordinal()));
-				this.setRotation(h.rotationYaw + rotation[0], h.rotationPitch + rotation[1]);
+				this.setRot(h.yRot + rotation[0], h.xRot + rotation[1]);
 				
 				double lr = h.width/this.refHostSize[0];
 				double hr = h.height/this.refHostSize[1];
@@ -216,7 +222,7 @@ public class EntityPart extends PartEntity implements IEntityAdditionalSpawnData
 				h.posY + this.dataManager.get(RELATIVE_Y).doubleValue(),
 				h.posZ + this.dataManager.get(RELATIVE_Z).doubleValue());
 		}
-		super.onUpdate();
+		super.tick();
 	}
 	
 	
