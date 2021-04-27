@@ -1,23 +1,17 @@
 package net.passengerDB.nen.entityparts;
 
 import net.passengerDB.nen.utils.NenLogger;
-import net.passengerDB.nen.client.renderer.entity.RenderEntityPart;
 import net.passengerDB.nen.utils.ReflectionHelper;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
-import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -27,24 +21,13 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderLivingBase;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.entity.projectile.EntityFireball;
-import net.minecraft.entity.projectile.EntityLlamaSpit;
-import net.minecraft.entity.projectile.EntityPotion;
-import net.minecraft.entity.projectile.EntityThrowable;
-import net.minecraft.network.play.server.SPacketChangeGameState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -104,6 +87,20 @@ public class PartsHandler {
 		}
 	}
 	*/
+	
+	/**
+	 * 讓爆擊傷害能反映在對EntityPart的攻擊上
+	 * */
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public void handleCricitalHit(CriticalHitEvent event) {
+		if(event.getTarget() instanceof EntityPart) {
+			PlayerEntity attacker = event.getPlayer();
+			if(attacker.getAttackStrengthScale(0.5f) > 0.9f && attacker.fallDistance > 0.0f && !attacker.isOnGround() && !attacker.onClimbable() && !attacker.isInWater() && !attacker.hasEffect(Effects.BLINDNESS) && !attacker.isPassenger() && !attacker.isSprinting()) {
+				event.setDamageModifier(event.getDamageModifier() * 1.5f);
+				event.setResult(Event.Result.ALLOW);
+			}
+		}
+	}
 	
 	@SubscribeEvent
 	public void onManagerTick(ServerTickEvent event) {

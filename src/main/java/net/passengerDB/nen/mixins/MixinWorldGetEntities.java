@@ -15,10 +15,14 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.passengerDB.nen.mixins.utils.ASMInjectMethods;
 
+/**
+ * 防止EntityPart在以任何需要取得宿主實體的狀況時，被選進去。(例如準心，防止準心只會指到自己的頭)
+ * */
 @Mixin(World.class)
-public class MixinWorldGetEntities {
+public final class MixinWorldGetEntities {
 
-	//防止EntityPart在以自身為基準(排除自身)取得周圍實體時，被選進去。
+	private MixinWorldGetEntities() {}
+	
 	@Inject(at = {@At(args="log=true", value = "RETURN")}, method = {"getEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;Ljava/util/function/Predicate;)Ljava/util/List;"}, cancellable = true)
 	private void getEntities(@Nullable Entity p_175674_1_, AxisAlignedBB p_175674_2_, @Nullable Predicate<? super Entity> p_175674_3_, CallbackInfoReturnable<List<Entity>> c) {
 		c.setReturnValue(ASMInjectMethods.getEntitiesExcludingSelfBodyPart(c.getReturnValue(), p_175674_1_));

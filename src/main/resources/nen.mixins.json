@@ -1,10 +1,11 @@
 {
 	"required": true,
-	"package": "com.example.examplemod.mixins",
+	"package": "net.passengerDB.nen.mixins",
 	"compatibilityLevel": "JAVA_8",
 	"refmap": "nen.refmap.json",
 	"mixins": [
-		"MixinsEntityItem"
+		"MixinPlayerEntityAttack",
+		"MixinWorldGetEntities"
 	],
 	"minVersion": "0.8"
 }

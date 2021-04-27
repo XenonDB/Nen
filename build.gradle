@@ -17,7 +17,7 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.0'
+version = '0.1-alpha'
 group = 'net.passengerDB.nen' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'nen'
 
@@ -47,7 +47,7 @@ minecraft {
         client {
             workingDirectory project.file('run')
 
-			arg "-mixin.config=examplemod.mixins.json"
+			arg "-mixin.config=nen.mixins.json"
 			
             // Recommended logging data for a userdev environment
             // The markers can be changed as needed. 
@@ -71,7 +71,7 @@ minecraft {
         server {
             workingDirectory project.file('run')
 
-			arg "-mixin.config=examplemod.mixins.json"
+			arg "-mixin.config=nen.mixins.json"
 			
             // Recommended logging data for a userdev environment
             // The markers can be changed as needed. 
@@ -95,7 +95,7 @@ minecraft {
         data {
             workingDirectory project.file('run')
 
-			arg "-mixin.config=examplemod.mixins.json"
+			arg "-mixin.config=nen.mixins.json"
 			
             // Recommended logging data for a userdev environment
             // The markers can be changed as needed. 
@@ -156,12 +156,12 @@ dependencies {
 jar {
     manifest {
         attributes([
-            "Specification-Title": "examplemod",
-            "Specification-Vendor": "examplemodsareus",
+            "Specification-Title": "nen",
+            "Specification-Vendor": "nen",
             "Specification-Version": "1", // We are version 1 of ourselves
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",
-            "Implementation-Vendor" :"examplemodsareus",
+            "Implementation-Vendor" :"nen",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
 			"MixinConfigs": "nen.mixins.json"
         ])

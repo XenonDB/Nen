@@ -4,31 +4,24 @@ import java.nio.charset.Charset;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityTracker;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.*;
 import net.passengerDB.nen.Nen;
 import net.passengerDB.nen.entityparts.partsenum.EnumEntityPartType;
 import net.passengerDB.nen.utils.NenConfig;
 import net.passengerDB.nen.utils.NenLogger;
 
-public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
+public class EntityPart extends PartEntity implements IEntityAdditionalSpawnData {
 	
 	private static final DataParameter<Float> LEN = EntityDataManager.createKey(EntityPart.class, DataSerializers.FLOAT);
 	private static final DataParameter<Float> HEIGHT = EntityDataManager.createKey(EntityPart.class, DataSerializers.FLOAT);
@@ -347,6 +340,42 @@ public class EntityPart extends Entity implements IEntityAdditionalSpawnData {
 	public void readSpawnData(ByteBuf additionalData) {
 		this.host = this.world.getEntityByID(additionalData.readInt());
 		this.type = EnumEntityPartType.values()[additionalData.readInt()];
+	}
+
+	@Override
+	public ITextComponent getName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void writeSpawnData(PacketBuffer buffer) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void readSpawnData(PacketBuffer additionalData) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void defineSynchedData() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void readAdditionalSaveData(CompoundNBT p_70037_1_) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void addAdditionalSaveData(CompoundNBT p_213281_1_) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	
