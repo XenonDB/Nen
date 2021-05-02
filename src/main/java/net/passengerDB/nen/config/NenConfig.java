@@ -1,4 +1,4 @@
-package net.passengerDB.nen.utils;
+package net.passengerDB.nen.config;
 
 import net.minecraftforge.common.config.Config;
 import net.passengerDB.nen.Nen;

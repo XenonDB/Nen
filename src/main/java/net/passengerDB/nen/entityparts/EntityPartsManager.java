@@ -48,10 +48,11 @@ public abstract class EntityPartsManager {
 	private boolean dirtyFlagMotion = false;
 	private boolean initialized = false;
 	protected double[] refHostSize = new double[3];
-	/*
-	 * 身體部件的管理者
-	 */
 	
+	/**
+	 * 身體部件的管理者
+	 * !!注意:實際的EntityPartsManager只會存在於伺服端，客戶端的EntityPart是根據伺服端操作entityData來同步行為的。因此要注意依賴於此類的資料或功能必須只能在伺服端操作。
+	 */
 	public EntityPartsManager(@Nonnull Entity host) {
 		if(host == null) throw new IllegalArgumentException("Can't construct an EntityPartsManager with null host!");
 		this.host = host;

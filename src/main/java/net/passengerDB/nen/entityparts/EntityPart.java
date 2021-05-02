@@ -21,7 +21,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.*;
 import net.passengerDB.nen.Nen;
 import net.passengerDB.nen.entityparts.partsenum.EnumEntityPartType;
-import net.passengerDB.nen.utils.NenConfig;
 import net.passengerDB.nen.utils.NenLogger;
 
 
@@ -49,6 +48,7 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 	public boolean canBeCollided = true;
 	
 	//表示宿主"通常"狀況下hitbox的寬與高，用來做為調整自身hitbox的參考值。
+	//於建構式中初始化，由EntityPartsManager傳入宿主的體型參考陣列進來。
 	//分別為x,y,z
 	private double[] refHostSize;
 	private double[] basicSize;
@@ -177,6 +177,12 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 		}
 	}
 	
+	private void updateAccrodingHost() {
+		Entity h = getHost();
+		
+		
+	}
+	
 	@Override
 	public void tick() {
 		Entity h = getHost();
@@ -258,15 +264,15 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 	public void applyEntityCollision(Entity e) {}
 	
 	@Override
-	public boolean attackEntityFrom(DamageSource src, float dmg) {
-		if(!this.world.isRemote) {
+	public boolean hurt(DamageSource src, float dmg) {
+		if(!this.level.isClientSide) {
 			Entity h = getHost();
-			boolean flag = h != null ? h.attackEntityFrom(src, dmg*dmgFactor) : false;
+			boolean flag = h != null ? h.hurt(src, dmg*dmgFactor) : false;
 			if(flag) {
-				Entity attacker = src.getTrueSource();
+				Entity attacker = src.getDirectEntity();
 				//假如其他模組的附魔，其中的onEntityDamaged或onUserHurt(尤其是onEntityDamaged)
 				//其第二個參數有可能傳入EntityPart做處理(不包含使用instanceof或之類的排除處理)，則EntityPart受攻擊時可能導致該附魔實際功能連續發動2次。
-				if(attacker instanceof EntityLivingBase)this.applyEnchantments((EntityLivingBase) attacker, h);
+				if(attacker instanceof LivingEntity)this.doEnchantDamageEffects((LivingEntity) attacker, h);
 				manager.markMotionUpdate();
 			}
 			return flag;

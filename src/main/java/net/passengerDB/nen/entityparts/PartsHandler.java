@@ -66,7 +66,7 @@ public class PartsHandler {
 		if(partCls == null) return;
 		
 		try {
-			if(!e.getWorld().isRemote) {
+			if(!e.getWorld().isClientSide) {
 				managerInstances.put(ent,partCls.getConstructor(Entity.class).newInstance(ent));
 			}
 		} catch (Exception exc) {
