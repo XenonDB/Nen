@@ -18,8 +18,10 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraft.network.PacketBuffer;
@@ -81,19 +83,7 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 	 */
 	
 	public EntityPart(Entity e) {
-		super(e);
-		this.entityData.define(LEN,Float.valueOf(0.0f));
-		this.entityData.define(HEIGHT,Float.valueOf(0.0f));
-		this.entityData.define(WIDTH,Float.valueOf(0.0f));
-		//不確定為甚麼客戶端的實體位置有時後不會跟伺服端同步
-		this.entityData.define(RELATIVE_X,Float.valueOf(0.0f));
-		this.entityData.define(RELATIVE_Y,Float.valueOf(0.0f));
-		this.entityData.define(RELATIVE_Z,Float.valueOf(0.0f));
-		
-		//this.entityData.define(HAS_HOST,Boolean.valueOf(false));
-		//this.entityData.define(HOST_ID,Integer.valueOf(0));
-		//this.dataManager.register(PART_TYPE,Integer.valueOf(-1));
-		
+		super(e);	
 	}
 	
 	public EntityPart(EntityPartsManager p, double[] refSize, boolean powerSrc, boolean controlSrc) {
@@ -247,6 +237,7 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 		
 	}
 	
+	//TODO: 將EntityPart是否可以在身體之外甚至另一維度保持的判定交由宿主本身決定
 	@Override
 	public void tick() {
 		Entity h = getHost();
@@ -311,23 +302,28 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 		}
 	}
 	
+	/**
+	 * EntityPart是宿主身上部分資料的實體化。因此設定嘗試穿越維度的時候將直接移除該Part。
+	 * 等宿主到達另一維度後再由PartsManager重新建立。
+	 * 如果有需要設計肢體錯位或斷手斷腳(?)的狀況，則用EntityPartsManager自行實作。
+	 * */
 	@Override
-	public Entity changeDimension(int dimensionIn, net.minecraftforge.common.util.ITeleporter teleporter) {
+	public Entity changeDimension(ServerWorld p_241206_1_, ITeleporter teleporter) {
 		return null;
 	}
 	
 	@Override
-	public boolean isPushedByWater() {
+	public boolean isPushedByFluid() {
 		return false;
 	}
 	
 	@Override
-	public boolean hasNoGravity() {
+	public boolean isNoGravity() {
 		return true;
 	}
 	
 	@Override
-	protected boolean canTriggerWalking() {
+	protected boolean isMovementNoisy() {
 		return false;
 	}
 	
@@ -335,12 +331,6 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 	public boolean startRiding(Entity entityIn, boolean force) {
 		return false;
 	}
-	
-	@Override
-	public boolean canBeRidden(Entity entityIn)
-    {
-        return false;
-    }
 	
 	@Override
     public boolean canBeCollidedWith() {
@@ -377,21 +367,24 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 	
 	@Override
 	protected void defineSynchedData() {
-		// TODO Auto-generated method stub
+		this.entityData.define(LEN,Float.valueOf(0.0f));
+		this.entityData.define(HEIGHT,Float.valueOf(0.0f));
+		this.entityData.define(WIDTH,Float.valueOf(0.0f));
+		//不確定為甚麼客戶端的實體位置有時後不會跟伺服端同步
+		this.entityData.define(RELATIVE_X,Float.valueOf(0.0f));
+		this.entityData.define(RELATIVE_Y,Float.valueOf(0.0f));
+		this.entityData.define(RELATIVE_Z,Float.valueOf(0.0f));
 		
+		//this.entityData.define(HAS_HOST,Boolean.valueOf(false));
+		//this.entityData.define(HOST_ID,Integer.valueOf(0));
+		//this.dataManager.register(PART_TYPE,Integer.valueOf(-1));
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundNBT p_70037_1_) {
-		// TODO Auto-generated method stub
-		
-	}
+	protected void readAdditionalSaveData(CompoundNBT p_70037_1_) {}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundNBT p_213281_1_) {
-		// TODO Auto-generated method stub
-		
-	}
+	protected void addAdditionalSaveData(CompoundNBT p_213281_1_) {}
 	
 	/**
 	 * 阻擋某些hitbox或是刷新實體大小的事件，因為EntityPart是根據宿主動態計算的
