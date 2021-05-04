@@ -1,17 +1,22 @@
 package net.passengerDB.nen.entityparts;
 
 import java.nio.charset.Charset;
+import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -19,6 +24,7 @@ import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.*;
+import net.minecraft.enchantment.ProtectionEnchantment;
 import net.passengerDB.nen.Nen;
 import net.passengerDB.nen.entityparts.partsenum.EnumEntityPartType;
 import net.passengerDB.nen.utils.NenLogger;
@@ -34,8 +40,9 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 	private static final DataParameter<Float> RELATIVE_X = EntityDataManager.defineId(EntityPart.class, DataSerializers.FLOAT);
 	private static final DataParameter<Float> RELATIVE_Y = EntityDataManager.defineId(EntityPart.class, DataSerializers.FLOAT);
 	private static final DataParameter<Float> RELATIVE_Z = EntityDataManager.defineId(EntityPart.class, DataSerializers.FLOAT);
-	private static final DataParameter<Boolean> HAS_HOST = EntityDataManager.defineId(EntityPart.class, DataSerializers.BOOLEAN);
-	private static final DataParameter<Integer> HOST_ID = EntityDataManager.defineId(EntityPart.class, DataSerializers.INT);
+	
+	//private static final DataParameter<Boolean> HAS_HOST = EntityDataManager.defineId(EntityPart.class, DataSerializers.BOOLEAN);
+	//private static final DataParameter<Integer> HOST_ID = EntityDataManager.defineId(EntityPart.class, DataSerializers.INT);
 	//private static final DataParameter<Integer> PART_TYPE = EntityDataManager.createKey(EntityPart.class, DataSerializers.VARINT);
 	
 	private EntityPartsManager manager;
@@ -57,8 +64,13 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 	@OnlyIn(Dist.CLIENT)
 	private Entity hostClient;
 	
+	//表示該身體部件相對於宿主的位置
 	private float[] relativeCoord = new float[3];
-	private float[] rotation = new float[2];
+	
+	//表示"上一次更新時，宿主的hitbox大小以及宿主的轉向"。用來作為是否更新EntityPart狀態的參考。
+	private AxisAlignedBB lastBB;
+	private float[] lastRotation;
+	
 	/*
 	 * 身體部件實體化的部分
 	 * 必須滿足:
@@ -77,9 +89,11 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 		this.entityData.define(RELATIVE_X,Float.valueOf(0.0f));
 		this.entityData.define(RELATIVE_Y,Float.valueOf(0.0f));
 		this.entityData.define(RELATIVE_Z,Float.valueOf(0.0f));
-		this.entityData.define(HAS_HOST,Boolean.valueOf(false));
-		this.entityData.define(HOST_ID,Integer.valueOf(0));
+		
+		//this.entityData.define(HAS_HOST,Boolean.valueOf(false));
+		//this.entityData.define(HOST_ID,Integer.valueOf(0));
 		//this.dataManager.register(PART_TYPE,Integer.valueOf(-1));
+		
 	}
 	
 	public EntityPart(EntityPartsManager p, double[] refSize, boolean powerSrc, boolean controlSrc) {
@@ -90,7 +104,7 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 		setRefSize(refSize);
 		
 		Entity h = this.manager.getHost();
-		this.setPosition(h.getX(), h.getY(), h.getZ());
+		this.moveTo(h.getX(), h.getY(), h.getZ());
 	}
 	
 	public EntityPart(EntityPartsManager p, double[] refSize) {
@@ -103,9 +117,9 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 	
 	public Entity getHost() {
 		if(this.level.isClientSide) {
-			if(this.hostClient == null) {
+			/*if(this.hostClient == null) {
 				this.hostClient = this.entityData.get(HAS_HOST).booleanValue() ? this.level.getEntity(this.entityData.get(HOST_ID).intValue()) : null;
-			}
+			}*/
 			return this.hostClient;
 		}
 		else {
@@ -114,11 +128,9 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 		}
 	}
 	
-	protected void entityInit() {
-		
-	}
-	
-	//直接取得EntityPartsManager的參考陣列，因此會與manager持有的同步
+	/**
+	 * 直接取得EntityPartsManager的參考陣列，因此會與manager持有的同步
+	 * */
 	protected EntityPart setRefSize(double[] refArr) {
 		refHostSize = refArr;
 		return this;
@@ -133,12 +145,6 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 		this.relativeCoord[0] = x;
 		this.relativeCoord[1] = y;
 		this.relativeCoord[2] = z;
-		return this;
-	}
-	
-	public EntityPart setRelativeAngles(float yaw, float pitch) {
-		this.rotation[0] = yaw;
-		this.rotation[1] = pitch;
 		return this;
 	}
 	
@@ -177,9 +183,67 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 		}
 	}
 	
-	private void updateAccrodingHost() {
+	/**
+	 * bounding box包含了座標的訊息(其分別記錄box的x y z絕對座標的起點和終點)並且為final。
+	 * 因此宿主座標、大小變了後，bounding box肯定不會是原本的那個box。
+	 * */
+	private boolean needUpdateSyncData() {
+		Entity h = getHost();
+		AxisAlignedBB box = h.getBoundingBox();
+		if(lastRotation == null) {
+			lastRotation = new float[2];
+		}
+		if(lastRotation[0] == h.yRot && lastRotation[1] == h.xRot && lastBB == box) {
+			return false;
+		}
+		lastRotation[0] = h.yRot;
+		lastRotation[1] = h.xRot;
+		lastBB = box;
+		return true;
+	}
+	
+	private void tryUpdateSyncData() {
+		
+		if(!needUpdateSyncData()) return;
+		
+		double lr = lastBB.getXsize()/this.refHostSize[0];
+		double hr = lastBB.getYsize()/this.refHostSize[1];
+		double wr = lastBB.getZsize()/this.refHostSize[2];
+		
+		double relX = this.relativeCoord[0]*lr;
+		double relZ = this.relativeCoord[2]*wr;
+		double rad = lastRotation[0] / 180 * Math.PI;
+		double cosrad = Math.cos(rad);
+		double sinrad = Math.sin(rad);
+		double newwidth = this.basicSize[2]*wr;
+		double wlDiffer = this.basicSize[0]*lr - this.basicSize[2]*wr;
+		
+		setSyncBoundingBoxSize(newwidth + wlDiffer*Math.abs(cosrad), this.basicSize[1]*hr, newwidth + wlDiffer*Math.abs(sinrad));
+		this.entityData.set(RELATIVE_X, Float.valueOf((float)(cosrad*relX - sinrad*relZ)));
+		this.entityData.set(RELATIVE_Y, Float.valueOf((float) (this.relativeCoord[1]*hr)));
+		this.entityData.set(RELATIVE_Z, Float.valueOf((float)(sinrad*relX + cosrad*relZ)));
+	}
+	
+	private void updateLocalStatus() {
+		
 		Entity h = getHost();
 		
+		if(!this.entityData.isDirty()) return;
+		
+		double hx = h.getX();
+		double hy = h.getY();
+		double hz = h.getZ();
+		
+		this.setPosAndOldPos(
+				hx + this.entityData.get(RELATIVE_X).doubleValue(),
+				hy + this.entityData.get(RELATIVE_Y).doubleValue(),
+				hz + this.entityData.get(RELATIVE_Z).doubleValue());
+		this.yRot = h.yRot;
+		this.xRot = h.xRot;
+		
+		double[] boxsize = getSyncBoundingBoxSize();
+		
+		setBoundingBox(new AxisAlignedBB(hx - boxsize[0]/2, hy, hz - boxsize[2]/2, hx + boxsize[0]/2, hy + boxsize[1], hz + boxsize[2]/2));
 		
 	}
 	
@@ -191,50 +255,18 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 			this.remove();
 		}
 		else {
-			if(!level.isClientSide) {
-				
-				this.entityData.set(HAS_HOST, Boolean.valueOf(true));
-				this.entityData.set(HOST_ID, Integer.valueOf(h.getId()));
-				//this.dataManager.set(PART_TYPE, Integer.valueOf(this.type.ordinal()));
-				this.setRot(h.yRot + rotation[0], h.xRot + rotation[1]);
-				
-				double lr = h.width/this.refHostSize[0];
-				double hr = h.height/this.refHostSize[1];
-				double wr = h.width/this.refHostSize[2];
-				
-				double relX = this.relativeCoord[0]*lr;
-				double relZ = this.relativeCoord[2]*wr;
-				double rad = this.rotationYaw / 180 * Math.PI;
-				double cosrad = Math.cos(rad);
-				double sinrad = Math.sin(rad);
-				double newwidth = this.basicSize[2]*wr;
-				double wlDiffer = this.basicSize[0]*lr - this.basicSize[2]*wr;
-				
-				setSyncBoundingBoxSize(newwidth + wlDiffer*Math.abs(cosrad), this.basicSize[1]*hr, newwidth + wlDiffer*Math.abs(sinrad));
-				this.dataManager.set(RELATIVE_X, Float.valueOf((float)(cosrad*relX - sinrad*relZ)));
-				this.dataManager.set(RELATIVE_Y, Float.valueOf((float) (this.relativeCoord[1]*hr)));
-				this.dataManager.set(RELATIVE_Z, Float.valueOf((float)(sinrad*relX + cosrad*relZ)));
-			}
-			else {
-				if(this.dataManager.isDirty()) {
-					EntityTracker.updateServerPosition(this,
-							h.posX + this.dataManager.get(RELATIVE_X).doubleValue(),
-							h.posY + this.dataManager.get(RELATIVE_Y).doubleValue(),
-							h.posZ + this.dataManager.get(RELATIVE_Z).doubleValue());
-				}
-			}
-			this.setPositionAndUpdate(
-				h.posX + this.dataManager.get(RELATIVE_X).doubleValue(),
-				h.posY + this.dataManager.get(RELATIVE_Y).doubleValue(),
-				h.posZ + this.dataManager.get(RELATIVE_Z).doubleValue());
+			if(!level.isClientSide) tryUpdateSyncData();
+			updateLocalStatus();
 		}
 		super.tick();
 	}
 	
 	
 	//實現第4點。不確定如果本體和部件處於不同區塊，會不會發生本體斷手之類的事情。
-	public void writeEntityToNBT(NBTTagCompound compound) {}
-	public void readEntityFromNBT(NBTTagCompound compound) {}
+	public void load(CompoundNBT compound) {}
+	public CompoundNBT saveWithoutId(CompoundNBT compound) {
+		return compound;
+	}
 	/*
 	@Override
 	public boolean writeToNBTAtomically(NBTTagCompound c) {
@@ -246,22 +278,9 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 	}
 	*/
 	
-	@Override
-	public void setPosition(double x, double y, double z)
-    {
-        this.posX = x;
-        this.posY = y;
-        this.posZ = z;
-        if (this.isAddedToWorld() && !this.world.isRemote) this.world.updateEntityWithOptionalForce(this, false);
-        double[] boxsize = this.getSyncBoundingBoxSize();
-        boxsize[0] = boxsize[0]/2;
-        boxsize[2] = boxsize[2]/2;
-        this.setEntityBoundingBox(new AxisAlignedBB(x - boxsize[0], y, z - boxsize[2], x + boxsize[0], y + boxsize[1], z + boxsize[2]));
-    }
-	
 	//實現第3點
 	@Override
-	public void applyEntityCollision(Entity e) {}
+	public void push(Entity e) {}
 	
 	@Override
 	public boolean hurt(DamageSource src, float dmg) {
@@ -281,14 +300,15 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 	}
 	
 	@Override
-	public void setFire(int seconds) {
+	public void setSecondsOnFire(int seconds) {
 		Entity h = getHost();
-		if(h instanceof EntityLivingBase) {
-			seconds = EnchantmentProtection.getFireTimeForEntity((EntityLivingBase)h, seconds*20);
-			super.setFire((int)Math.ceil(seconds/20.0));
-			return;
+		seconds *= 20;
+		if(h instanceof LivingEntity) {
+			seconds = ProtectionEnchantment.getFireAfterDampener((LivingEntity)h, seconds);
 		}
-		super.setFire(seconds);
+		if(this.getRemainingFireTicks() < seconds) {
+			this.setRemainingFireTicks(seconds);
+		}
 	}
 	
 	@Override
@@ -323,11 +343,6 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
     }
 	
 	@Override
-	public String getName() {
-		return I18n.translateToLocalFormatted(String.format("nen.entity.entitypart.name.%s", this.type.name()), getHost().getName());
-	}
-	
-	@Override
     public boolean canBeCollidedWith() {
         return canBeCollided;
     }
@@ -342,36 +357,24 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
     }
 
 	@Override
-	public void writeSpawnData(ByteBuf buffer) {
-		buffer.writeInt(this.manager != null ? this.manager.getHost().getEntityId() : 0);
-		buffer.writeInt(this.type.ordinal());
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void readSpawnData(ByteBuf additionalData) {
-		this.host = this.world.getEntityByID(additionalData.readInt());
-		this.type = EnumEntityPartType.values()[additionalData.readInt()];
-	}
-
-	@Override
-	public ITextComponent getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void writeSpawnData(PacketBuffer buffer) {
-		// TODO Auto-generated method stub
-		
+		buffer.writeInt(this.manager != null ? this.manager.getHost().getId() : 0);
+		buffer.writeInt(this.type.ordinal());		
 	}
 
 	@Override
+	@OnlyIn(value = Dist.CLIENT)
 	public void readSpawnData(PacketBuffer additionalData) {
-		// TODO Auto-generated method stub
-		
+		this.hostClient = this.level.getEntity(additionalData.readInt());
+		this.type = EnumEntityPartType.values()[additionalData.readInt()];		
 	}
 
+	@Override
+	public ITextComponent getCustomName() {
+		String name = I18n.get(String.format("nen.entity.entitypart.name.%s", this.type.name()), getHost().getName());
+		return ITextComponent.Serializer.fromJson(String.format("{\"text\":\"%s\"}", name));
+	}
+	
 	@Override
 	protected void defineSynchedData() {
 		// TODO Auto-generated method stub
@@ -389,6 +392,15 @@ public class EntityPart extends PartEntity<Entity> implements IEntityAdditionalS
 		// TODO Auto-generated method stub
 		
 	}
-
+	
+	/**
+	 * 阻擋某些hitbox或是刷新實體大小的事件，因為EntityPart是根據宿主動態計算的
+	 * */
+	
+	@Override
+	public void onSyncedDataUpdated(DataParameter<?> p_184206_1_) {}
+	
+	@Override
+	public void refreshDimensions() {}
 	
 }

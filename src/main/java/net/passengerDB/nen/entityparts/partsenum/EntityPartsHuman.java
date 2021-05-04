@@ -3,6 +3,7 @@ package net.passengerDB.nen.entityparts.partsenum;
 import javax.annotation.Nonnull;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.world.server.ServerWorld;
 import net.passengerDB.nen.entityparts.EntityPart;
 import net.passengerDB.nen.entityparts.EntityPartsManager;
 
@@ -41,31 +42,33 @@ public class EntityPartsHuman extends EntityPartsManager {
 		this.parts.put(EnumEntityPartType.HEAD, new EntityPart[]{new EntityPart(this,this.refHostSize,false,true)});
 		this.parts.put(EnumEntityPartType.BODY, new EntityPart[]{new EntityPart(this,this.refHostSize,true,false)});
 		
+		ServerWorld sw = (ServerWorld)h.level;
+		
 		EntityPart part = getHead();
 		part.setRelativeLocation(0.0f, 1.375f, 0.0f).setPartSize(0.6875, 0.5, 0.6875).setPartType(EnumEntityPartType.HEAD).setDamageFactor(1.05f);
-		h.world.spawnEntity(part);
+		sw.addFreshEntity(part);
 		
 		part = getRightArm();
 		part.setRelativeLocation(-0.375f, 0.6875f, 0.0f).setPartSize(0.3125, 0.75, 0.3125).setPartType(EnumEntityPartType.ARM).setDamageFactor(0.15f);
-		h.world.spawnEntity(part);
+		sw.addFreshEntity(part);
 		
 		part = getLeftArm();
 		part.setRelativeLocation(0.375f, 0.6875f, 0.0f).setPartSize(0.3125, 0.75, 0.3125).setPartType(EnumEntityPartType.ARM).setDamageFactor(0.15f);
-		h.world.spawnEntity(part);
+		sw.addFreshEntity(part);
 		
 		part = getRightLeg();
 		part.setRelativeLocation(-0.1875f, 0.0f, 0.0f).setPartSize(0.375, 0.6875, 0.6875).setPartType(EnumEntityPartType.LEG).setDamageFactor(0.25f);
-		h.world.spawnEntity(part);
+		sw.addFreshEntity(part);
 		
 		part = getLeftLeg();
 		part.setRelativeLocation(0.1875f, 0.0f, 0.0f).setPartSize(0.375, 0.6875, 0.6875).setPartType(EnumEntityPartType.LEG).setDamageFactor(0.25f);
-		h.world.spawnEntity(part);
+		sw.addFreshEntity(part);
 		
 		//僅用於顯示氣場用
 		part = getBody();
 		part.canBeCollided = false;
 		part.setRelativeLocation(0.0f, 0.6875f, 0.0f).setPartSize(0.6875, 0.6875, 0.3125).setPartType(EnumEntityPartType.BODY).setDamageFactor(1.0f);
-		h.world.spawnEntity(part);
+		sw.addFreshEntity(part);
 		
 	}
 	

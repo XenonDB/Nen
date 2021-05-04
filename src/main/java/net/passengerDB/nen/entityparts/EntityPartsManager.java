@@ -6,8 +6,8 @@ import java.util.Map.Entry;
 import javax.annotation.Nonnull;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.monster.EntityZombie;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.passengerDB.nen.entityparts.partsenum.EntityPartsHuman;
 import net.passengerDB.nen.entityparts.partsenum.EnumEntityPartType;
 import net.passengerDB.nen.utils.NenLogger;
@@ -62,7 +62,9 @@ public abstract class EntityPartsManager {
 		return host;
 	}
 	
-	//createParts指定給各部位的參考大小，直接傳陣列值的方式給予，會同步
+	/**
+	 * createParts指定給各部位的參考大小，直接傳陣列值的方式給予，會同步
+	 * */
 	protected void setRefHostSize(double len, double height, double width) {
 		refHostSize[0] = len;
 		refHostSize[1] = height;

@@ -28,9 +28,10 @@ import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.common.MinecraftForge;
-
 
 public class PartsHandler {
 
@@ -47,14 +48,18 @@ public class PartsHandler {
 	
 	private PartsHandler() {}
 	
-	@SubscribeEvent
+	/**
+	 * 根據設定生成對應的EntityPartManager來管理一個實際存在生物的部件。
+	 * 須注意EntityPartManager僅在伺服端(除了單人世界)生成。
+	 * */
+	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public void createPartsForEntity(EntityJoinWorldEvent e) {
 		
 		//NenLogger.info(String.format("createPartsForEntity %s", e.getEntity().toString()));
 		
 		Entity ent = e.getEntity();
 		
-		if(ent instanceof EntityPart) return;
+		if(ent instanceof EntityPart || ent.level.isClientSide) return;
 		
 		Class entCls = ent.getClass();
 		Class<? extends EntityPartsManager> partCls = EntityPartsManager.getAssignParts(entCls);
@@ -66,11 +71,9 @@ public class PartsHandler {
 		if(partCls == null) return;
 		
 		try {
-			if(!e.getWorld().isClientSide) {
-				managerInstances.put(ent,partCls.getConstructor(Entity.class).newInstance(ent));
-			}
-		} catch (Exception exc) {
-			exc.printStackTrace();
+			managerInstances.put(ent,partCls.getConstructor(Entity.class).newInstance(ent));
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e1) {
+			e1.printStackTrace();
 		}
 		
 	}
