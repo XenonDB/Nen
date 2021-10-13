@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 
 public class ReflectionHelper {
 
+	/*
 	public static Object getFieldValue(Class objCls, Object o, String fieldname) {
 		try {
 			Field f = objCls.getDeclaredField(fieldname);
@@ -33,5 +34,5 @@ public class ReflectionHelper {
 			super(t);
 		}
 	}
-	
+	*/
 }
