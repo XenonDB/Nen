@@ -42,7 +42,7 @@ public enum Entities {
 			}
 		}, classification);
 		
-		extraAttribute.accept(builder);
+		if(extraAttribute != null) extraAttribute.accept(builder);
 		
 		this.registeredObj = DeferredRegistered.registeredEntities.register(finalEntityName, () -> builder.build(finalEntityName));
 		
