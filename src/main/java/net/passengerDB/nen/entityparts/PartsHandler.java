@@ -2,6 +2,7 @@ package net.passengerDB.nen.entityparts;
 
 import net.passengerDB.nen.utils.NenLogger;
 import net.passengerDB.nen.utils.ReflectionHelper;
+import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
@@ -27,11 +28,15 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
+import net.minecraft.entity.projectile.ThrowableEntity;
 
 public class PartsHandler {
 
@@ -109,7 +114,7 @@ public class PartsHandler {
 	public void onManagerTick(ServerTickEvent event) {
 		EntityPartsManager manager;
 		Iterator<EntityPartsManager> tmpitr = managerInstances.values().iterator();
-		if(event.phase == Phase.START) {
+		if(event.phase == TickEvent.Phase.START) {
 			try {
 				while(true) {
 					manager = tmpitr.next();
@@ -118,7 +123,7 @@ public class PartsHandler {
 			}
 			catch(NoSuchElementException exc) {}
 		}
-		else if(event.phase == Phase.END) {
+		else if(event.phase == TickEvent.Phase.END) {
 			try {
 				while(true) {
 					manager = tmpitr.next();
@@ -140,18 +145,27 @@ public class PartsHandler {
 		if(event.getEntityBeingMounted() instanceof EntityPart) event.setCanceled(true);
 	}
 	
+	/**
+	 * 更新了Mixin中對getEntities處理的相關方法來解決投射物立刻撞到自己的問題。
+	 * */
+	/*
 	@SubscribeEvent
 	public void handleProjectileImpactOnPart(ProjectileImpactEvent event) {
 		//箭矢及EntityThrowable避免打到發射者的機制不同:箭矢是發射後5tick內忽略發射者
 		//EntityThrowable則是發射後2tick內，指定範圍內碰撞到的其中一個實體並永久忽略。而在離開該實體2tick後，才可再次碰撞該實體。
 		//當碰到方塊時，不做任何處理，setCancelled(false)
 		//當碰到實體時才處理。
-		Entity hit = event.getRayTraceResult().entityHit;
-		if(hit == null) return;
+		
+		RayTraceResult hit = event.getRayTraceResult();
+		
+		if(!(hit instanceof EntityRayTraceResult)) return;
+		
+		Entity enthit = ((EntityRayTraceResult) hit).getEntity();
+		if(enthit == null) return;
 		
 		Entity proj = event.getEntity();
 		boolean flag = false;
-		if(proj instanceof EntityThrowable) {
+		if(proj instanceof ThrowableEntity) {
 			//注意EntityThrowable的RayTraceResult表示碰到實體時，投擲物也可能同時碰到方塊(會優先使用碰到實體的RayTraceResult)
 			flag = proj.ticksExisted < 5 && proj.world.rayTraceBlocks(new Vec3d(proj.posX, proj.posY, proj.posZ), new Vec3d(proj.posX + proj.motionX, proj.posY + proj.motionY, proj.posZ + proj.motionZ)) == null;
 		}
@@ -183,5 +197,5 @@ public class PartsHandler {
 		}
 		event.setCanceled(flag);
 	}
-	
+	*/
 }

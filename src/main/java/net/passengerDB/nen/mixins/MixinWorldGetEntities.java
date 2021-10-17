@@ -25,7 +25,7 @@ public final class MixinWorldGetEntities {
 	
 	@Inject(at = {@At(args="log=true", value = "RETURN")}, method = {"getEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;Ljava/util/function/Predicate;)Ljava/util/List;"}, cancellable = true)
 	private void getEntities(@Nullable Entity p_175674_1_, AxisAlignedBB p_175674_2_, @Nullable Predicate<? super Entity> p_175674_3_, CallbackInfoReturnable<List<Entity>> c) {
-		c.setReturnValue(ASMInjectMethods.getEntitiesExcludingSelfBodyPart(c.getReturnValue(), p_175674_1_));
+		c.setReturnValue(ASMInjectMethods.handleGetEntities(c.getReturnValue(), p_175674_1_));
 	}
 	
 }
