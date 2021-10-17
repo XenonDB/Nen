@@ -15,19 +15,18 @@ public class ASMInjectMethods {
 	public static List<Entity> handleGetEntities(List<Entity> list, Entity ref){
 		
 		if(ref instanceof ProjectileEntity) {
-			getEntitiesIncludingSelfBodyPartForProjectile(list, (ProjectileEntity)ref);
+			makeEntitiesIncludingSelfBodyPartForProjectile(list, (ProjectileEntity)ref);
 		}else {
-			getEntitiesExcludingSelfBodyPart(list,ref);
+			makeEntitiesExcludingSelfBodyPart(list,ref);
 		}
 		
 		return list;
 	}
 	
-	public static List<Entity> getEntitiesExcludingSelfBodyPart(List<Entity> list, Entity ref){
+	public static void makeEntitiesExcludingSelfBodyPart(List<Entity> list, Entity ref){
 		
 		if(ref != null) list.removeIf(new IsHostEqualTo(ref));
 		
-		return list;
 	}
 	
 	/**
@@ -36,7 +35,7 @@ public class ASMInjectMethods {
 	 * 那麼可以大膽的假設：此時呼叫這個函數的作用是在「確認是否已離開發射者」。因為從原始碼來看，只要投擲物尚未離開發射者，每tick都會呼叫他來檢查是否已離開發射者。
 	 * 所以此時可以將list中的EntityPart，宿主與箭矢發射者相同的部分替換成宿主本體，讓checkLeftOwner也能對EntityPart生效。
 	 * */
-	public static List<Entity> getEntitiesIncludingSelfBodyPartForProjectile(List<Entity> list, ProjectileEntity proj){
+	public static void makeEntitiesIncludingSelfBodyPartForProjectile(List<Entity> list, ProjectileEntity proj){
 		/**
 		 * MC 1.16.5: net/minecraft/world/entity/projectile/Projectile.leftOwner
 		 * Name: d => field_234611_d_ => leftOwner
@@ -51,8 +50,6 @@ public class ASMInjectMethods {
 				list.add(owner);
 			}
 		}
-		
-		return list;
 	}
 	
 	public static float applyEnchantmentToPartForPlayer(PlayerEntity p, Entity target, float orig) {
