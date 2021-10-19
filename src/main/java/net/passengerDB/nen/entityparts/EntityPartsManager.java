@@ -1,16 +1,17 @@
 package net.passengerDB.nen.entityparts;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
 import javax.annotation.Nonnull;
 
 import net.minecraft.entity.Entity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.entity.monster.ZombieEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.vector.Vector3d;
 import net.passengerDB.nen.entityparts.partsenum.EntityPartsHuman;
 import net.passengerDB.nen.entityparts.partsenum.EnumEntityPartType;
-import net.passengerDB.nen.utils.NenLogger;
 
 public abstract class EntityPartsManager {
 
@@ -38,8 +39,8 @@ public abstract class EntityPartsManager {
 	
 	//指定哪一種實體要使用哪一種身體部件組
 	static{
-		assignMap.put(EntityPlayer.class, EntityPartsHuman.class);
-		assignMap.put(EntityZombie.class, EntityPartsHuman.class);
+		registerPartAssignment(PlayerEntity.class, EntityPartsHuman.class, false);
+		registerPartAssignment(ZombieEntity.class, EntityPartsHuman.class, false);
 	}
 	
 	
@@ -48,6 +49,7 @@ public abstract class EntityPartsManager {
 	private boolean dirtyFlagMotion = false;
 	private boolean initialized = false;
 	protected double[] refHostSize = new double[3];
+	private boolean markRecreateParts = false;
 	
 	/**
 	 * 身體部件的管理者
@@ -82,27 +84,31 @@ public abstract class EntityPartsManager {
 	public abstract void createParts();
 	
 	protected void init() {
-		if(host.addedToChunk) {
+		if(host.isAddedToWorld()) {
 			createParts();
 			this.initialized = true;
 		} 
 	}
 	
-	private void checkAllPartsInWorld() {
-		for(Entry<EnumEntityPartType, EntityPart[]> entry : parts.entrySet()) {
-			for(EntityPart e : entry.getValue()) {
-				if(!e.isAddedToWorld()) {
-					reCreateParts();
-					break;
-				}
-			}
+	public void markRecreateParts(boolean b) {
+		synchronized(this) {
+			markRecreateParts = b;
 		}
+	}
+	
+	private void checkAllPartsInWorld() {
+		parts.values().parallelStream().forEach(e -> {
+			Arrays.stream(e).parallel().forEach(ee -> {
+				if(!this.markRecreateParts && !ee.isAddedToWorld()) markRecreateParts(true);
+			});
+		});
+		if(this.markRecreateParts) reCreateParts();
 	}
 	
 	protected void removeAllParts(boolean flushPartsList) {
 		for(Entry<EnumEntityPartType, EntityPart[]> entry : parts.entrySet()) {
 			for(EntityPart e : entry.getValue()) {
-				e.setDead();
+				e.remove();
 			}
 		}
 		if(flushPartsList) parts = new HashMap<EnumEntityPartType,EntityPart[]>();
@@ -111,6 +117,7 @@ public abstract class EntityPartsManager {
 	public void reCreateParts() {
 		removeAllParts(true);
 		createParts();
+		markRecreateParts(false);
 	}
 	
 	public void preUpdate() {
@@ -122,8 +129,9 @@ public abstract class EntityPartsManager {
 		if(!this.initialized) {
 			init();
 		}
-		if(!host.isDead) {
-			if(this.host.world.getTotalWorldTime() % 100 == 5) checkAllPartsInWorld();
+		if(host.isAlive()) {
+			//先暫時取消好了，一直很懷疑是否真的會發生誤入未載入區塊導致斷肢問題。要是真的有的話到時候再想想該怎麼修。
+			//if(this.host.level.getGameTime() % 100 == 5) checkAllPartsInWorld();
 		}
 		else {
 			
@@ -143,33 +151,32 @@ public abstract class EntityPartsManager {
 		
 		int count = 0;
 		double[] motion = new double[3];
+		
+		Vector3d tmp = null;
+		
 		for(Entry<EnumEntityPartType, EntityPart[]> entry : parts.entrySet()) {
 			for(EntityPart e : entry.getValue()) {
 				if(e == host) continue;
-				if(e.motionX != 0 || e.motionY != 0 || e.motionZ != 0) {
+				tmp = e.getDeltaMovement();
+				if(tmp.x() != 0 || tmp.y() != 0 || tmp.z() != 0) {
 					count++;
-					motion[0] += e.motionX;
-					motion[1] += e.motionY;
-					motion[2] += e.motionZ;
-					e.motionX = 0.0;
-					e.motionY = 0.0;
-					e.motionZ = 0.0;
+					motion[0] += tmp.x;
+					motion[1] += tmp.y;
+					motion[2] += tmp.z;
+					e.setDeltaMovement(Vector3d.ZERO);
 				}
 			}
 		}
 		//NenLogger.info(String.format("%f %f %f %d", motion[0], motion[1], motion[2], count));
-		if(host.velocityChanged) {
+		tmp = host.getDeltaMovement();
+		if(tmp.x() != 0 || tmp.y() != 0 || tmp.z() != 0) {
 			count++;
-			motion[0] += host.motionX;
-			motion[1] += host.motionY;
-			motion[2] += host.motionZ;
+			motion[0] += tmp.x;
+			motion[1] += tmp.y;
+			motion[2] += tmp.z;
 		}
 		if(count > 0) {
-			host.motionX = motion[0]/count;
-			host.motionY = motion[1]/count;
-			host.motionZ = motion[2]/count;
-			host.isAirBorne = true;
-			host.velocityChanged = true;
+			host.setDeltaMovement(motion[0]/count,motion[1]/count,motion[2]/count);
 		}
 		
 		this.dirtyFlagMotion = false;
