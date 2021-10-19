@@ -1,23 +1,13 @@
 package net.passengerDB.nen.entityparts;
 
-import java.nio.charset.Charset;
-import java.util.List;
-
-import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -27,9 +17,7 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.*;
 import net.minecraft.enchantment.ProtectionEnchantment;
-import net.passengerDB.nen.Nen;
 import net.passengerDB.nen.entityparts.partsenum.EnumEntityPartType;
-import net.passengerDB.nen.utils.NenLogger;
 
 
 //TODO: 需要更多測試來確認是否沒有問題
