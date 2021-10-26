@@ -10,7 +10,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.passengerDB.nen.entityparts.EntityPart;
-import net.passengerDB.nen.mixins.utils.ASMInjectMethods;
+import net.passengerDB.nen.utils.asm.ASMInjectMethods;
 
 /**
  * 讓玩家的直接攻擊擊中部位時可以根據宿主做出正確的計算/反應。
@@ -29,7 +29,7 @@ public final class MixinPlayerEntityAttack{
 	
 	//使火焰附加可以生效
 	@Inject(at = { @At(value = "INVOKE", target = "net.minecraft.entity.player.PlayerEntity.causeFoodExhaustion(F)V") }, method = { "attack(Lnet/minecraft/entity/Entity;)V" })
-	private void attack2(Entity p_71059_1_) {
+	private void attack2(Entity p_71059_1_, CallbackInfo ci) {
 		if(p_71059_1_ instanceof EntityPart) {
 			int j = EnchantmentHelper.getFireAspect((PlayerEntity)(Object)this);
 			if(j > 0) p_71059_1_.setSecondsOnFire(j * 4);

@@ -23,13 +23,18 @@ public class PartsHandler {
 
 	public static final PartsHandler partEventHandler = new PartsHandler();
 	
+	/**
+	 * 以事件來給EntityPartsManager tick已當作廢案。
+	 * */
+	/*
 	private static final HashMap<Entity,EntityPartsManager> managerInstances = new HashMap<Entity,EntityPartsManager>();
 	public static final HashSet<Entity> managerToRemove = new HashSet<Entity>();
+	*/
+	public static void init() {}
 	
-	public static void init() {
-		MinecraftForge.EVENT_BUS.unregister(partEventHandler);
+	static {
 		MinecraftForge.EVENT_BUS.register(partEventHandler);
-		NenLogger.info("Successfully init entity part system.");
+		NenLogger.info("Successfully init entity part related event handler.");
 	}
 	
 	private PartsHandler() {}
@@ -38,6 +43,7 @@ public class PartsHandler {
 	 * 根據設定生成對應的EntityPartManager來管理一個實際存在生物的部件。
 	 * 須注意EntityPartManager僅在伺服端(除了單人世界)生成。
 	 * */
+	/*
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public void createPartsForEntity(EntityJoinWorldEvent e) {
 		
@@ -63,18 +69,7 @@ public class PartsHandler {
 		}
 		
 	}
-	/*
-	@SubscribeEvent
-	public void onInteractEntity(PlayerInteractEvent.EntityInteractSpecific event) {
-		NenLogger.info(event.getTarget().toString());
-		if(event.getTarget().world.isRemote) NenLogger.info(event.getTarget().serverPosX + " " + event.getTarget().serverPosY + " " + event.getTarget().serverPosZ);
-		try {
-			throw new Exception("For testing event");
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
+	
 	*/
 	
 	/**
@@ -90,7 +85,7 @@ public class PartsHandler {
 			}
 		}
 	}
-	
+	/*
 	@SubscribeEvent
 	public void onManagerTick(ServerTickEvent event) {
 		EntityPartsManager manager;
@@ -120,6 +115,7 @@ public class PartsHandler {
 			managerToRemove.clear();
 		}
 	}
+	*/
 	
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void disablePartbeingMounted(EntityMountEvent event) {

@@ -1,4 +1,4 @@
-package net.passengerDB.nen.mixins.utils;
+package net.passengerDB.nen.utils.asm;
 
 import java.util.function.Predicate;
 

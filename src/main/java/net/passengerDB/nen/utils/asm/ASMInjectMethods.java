@@ -1,5 +1,6 @@
-package net.passengerDB.nen.mixins.utils;
+package net.passengerDB.nen.utils.asm;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -9,6 +10,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.passengerDB.nen.entityparts.EntityPart;
+import net.passengerDB.nen.entityparts.EntityPartsManager;
+import net.passengerDB.nen.entityparts.IHostable;
+import net.passengerDB.nen.entityparts.api.*;
+import net.passengerDB.nen.entityparts.partsenum.EntityPartsHuman;
 
 public class ASMInjectMethods {
 
@@ -59,4 +64,23 @@ public class ASMInjectMethods {
 		}
 		return orig;
 	}
+	
+	public static void handleTickingEntityPartsManager(Entity e) {
+		
+		if(e.level.isClientSide || !PartsRegisterAPI.canSetManagerFor(e.getClass())) return;
+		
+		if(GeneralEntityPartsAPI.getManager(e) == null) {
+			Class<? extends EntityPartsManager> managerCls = PartsRegisterAPI.getAssignParts(e.getClass()).get();
+			EntityPartsManager manager = null;
+			try {
+				manager = managerCls.getConstructor(Entity.class).newInstance(e);
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e1) {
+				throw new RuntimeException(e1);
+			}
+			GeneralEntityPartsAPI.setManager(e, manager);
+		}
+		
+		GeneralEntityPartsAPI.getManager(e).onTick();
+	}
+	
 }

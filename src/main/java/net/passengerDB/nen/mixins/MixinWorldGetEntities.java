@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
-import net.passengerDB.nen.mixins.utils.ASMInjectMethods;
+import net.passengerDB.nen.utils.asm.ASMInjectMethods;
 
 /**
  * 防止EntityPart在以任何需要取得宿主實體的狀況時，被選進去。(例如準心，防止準心只會指到自己的頭)

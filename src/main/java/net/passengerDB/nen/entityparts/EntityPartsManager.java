@@ -14,35 +14,6 @@ import net.passengerDB.nen.entityparts.partsenum.EntityPartsHuman;
 import net.passengerDB.nen.entityparts.partsenum.EnumEntityPartType;
 
 public abstract class EntityPartsManager {
-
-	private static HashMap<Class<? extends Entity>,Class<? extends EntityPartsManager>> assignMap = new HashMap<Class<? extends Entity>,Class<? extends EntityPartsManager>>();
-	
-	public static Class<? extends EntityPartsManager> getAssignParts(Class<? extends Entity> e){
-		return assignMap.get(e);
-	}
-	
-	/**
-	 * 註冊哪一類實體需要使用哪種EntityPartsManager。replace = true表示要取代現有的設定，回傳值表示是否註冊成功。
-	 * 若replace = true但沒有註冊，或是replace = false且已經註冊，則會回傳false。
-	 * **/
-	public static boolean registerPartAssignment(Class<? extends Entity> e, Class<? extends EntityPartsManager> m, boolean replace) {
-		if(assignMap.containsKey(e) != replace) return false;
-		assignMap.put(e, m);
-		return true;
-	}
-	
-	public static boolean removePartAssignment(Class<? extends Entity> e) {
-		if(!assignMap.containsKey(e)) return false;
-		assignMap.remove(e);
-		return true;
-	}
-	
-	//指定哪一種實體要使用哪一種身體部件組
-	static{
-		registerPartAssignment(PlayerEntity.class, EntityPartsHuman.class, false);
-		registerPartAssignment(ZombieEntity.class, EntityPartsHuman.class, false);
-	}
-	
 	
 	private final Entity host;
 	protected HashMap<EnumEntityPartType,EntityPart[]> parts = new HashMap<EnumEntityPartType,EntityPart[]>();//暫時
@@ -120,11 +91,7 @@ public abstract class EntityPartsManager {
 		markRecreateParts(false);
 	}
 	
-	public void preUpdate() {
-		updateMotionToHost();
-	}
-	
-	public void postUpdate() {
+	public void onTick() {
 		
 		if(!this.initialized) {
 			init();
@@ -137,7 +104,7 @@ public abstract class EntityPartsManager {
 			
 		}
 		
-		if(!host.isAddedToWorld()) PartsHandler.managerToRemove.add(host);
+		updateMotionToHost();
 		
 	}
 	

@@ -4,6 +4,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig.Type;
 import net.passengerDB.nen.config.NenConfig;
+import net.passengerDB.nen.entityparts.PartsHandler;
 import net.passengerDB.nen.utils.NenLogger;
 
 
@@ -22,6 +23,13 @@ public class Nen
     	return INSTANCE;
     }
     
+    public static void initConfig() {
+    	ModLoadingContext.get().registerConfig(Type.COMMON, NenConfig.SPEC, NenConfig.CONFIG_NAME);
+    }
+    
+    public static void initPartsSystem() {
+    	PartsHandler.init();
+    }
     
     //ClientCustomPacketEvent
     
@@ -30,13 +38,12 @@ public class Nen
     	synchronized(Nen.class) {
     		if(INSTANCE != null) throw new RuntimeException("Someone try to instance Nen mod twice or more!");
     		
-    		ModLoadingContext.get().registerConfig(Type.COMMON, NenConfig.SPEC, NenConfig.CONFIG_NAME);
+    		initConfig();
+    		initPartsSystem();
     		
     		NenLogger.info("mod instance is created.");
     		INSTANCE = this;
     	}
-    	
-    	
     }
     
 }
